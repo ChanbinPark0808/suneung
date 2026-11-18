@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script>
+/* ================================================================
+   여기만 고치면 됩니다
+   ================================================================ */
+const CONFIG = {
+  // 보내는 사람 이름. 편지 아래에 "from. ○○"으로 찍힙니다.
+  from: '찬빈',
+
+  // 편지 본문. 100자 이내 권장 (길면 영수증에 맞게 글자 크기가 자동으로 줄어듭니다).
+  // 줄을 바꾸려면 \n 을 넣으세요. 예: '첫 줄\n둘째 줄'
+  letter: '수능 잘 보고 와!!\n입시는 너가 생각하는 것보다 더 잘 풀릴 거야.\n내년 2월까지 계속 응원할게 ㅋㅎ\n네가 준비한 것보다 더 좋은 결과가 있기를 바라!\n하나님께서 늘 함께해 주시길🙏🍀',
+
+  // 링크에 ?to=이름 이 없을 때 쓰는 기본 이름 (입력칸을 비워 두면 이 이름으로 발급)
+  defaultName: '000',
+
+  // 시험일. 유효기간·바코드 번호·도장 날짜에 쓰입니다.
+  examDate: '2026.11.19',
+};
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>수능 대박 영수증</title>
+<meta name="description" content="교환·환불 불가. 대박만 가능.">
+<!-- 검색엔진에 안 잡히게 (링크를 받은 사람만 보도록). 카톡 미리보기는 그대로 동작 -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#1e232b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 3h18v24l-3-2-3 2-3-2-3 2-3-2-3 2z' fill='%23f4efe3'/%3E%3Cpath d='M11 9h10M11 13h10M11 17h6' stroke='%233a3631' stroke-width='1.6'/%3E%3Ccircle cx='21' cy='21' r='4.2' fill='none' stroke='%23c4392d' stroke-width='1.8'/%3E%3C/svg%3E">
+
+<!-- 공유 미리보기 (카카오톡 등) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="수능 대박 영수증이 발급되었습니다">
+<meta property="og:description" content="교환·환불 불가. 대박만 가능.">
+<!-- 배포 후 채우기: 1200×630 PNG의 절대 URL (https://...) -->
+<!-- <meta property="og:image" content="https://YOUR-DOMAIN/og-image.png"> -->
+<!-- <meta property="og:url" content="https://YOUR-DOMAIN/"> -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+<!-- 도장 글자 전용: 合格大吉박 다섯 글자만 받아오는 서브셋 -->
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&text=%E5%90%88%E6%A0%BC%E5%A4%A7%E5%90%89%EB%B0%95&display=block">
+<script defer src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+
+<style>
+:root {
+  --bg: #1e232b;          /* 카드·잠금화면 배경 */
+  --bg-deep: #14171c;     /* 데스크톱 바깥 여백 */
+  --paper: #f4efe3;       /* 감열지 미색 */
+  --ink: #3a3631;         /* 살짝 바랜 감열 잉크 */
+  --ink-soft: rgba(58, 54, 49, .64);
+  --ink-line: rgba(58, 54, 49, .5);
+  --red: #c4392d;         /* 유일한 포인트 컬러: 인주 */
+  --lcd: #13171c;
+  --lcd-ink: #ece6d4;
+  --metal-1: #39414c;
+  --metal-2: #2a3038;
+  --metal-3: #22272e;
+  --muted: #8d95a1;
+  --font: 'Nanum Gothic Coding', ui-monospace, 'D2Coding', Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--lcd-ink);
+  font-family: var(--font);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+button, input { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* ---------- 무대: 390×844 고정, 화면에 맞게 통째로 축소 ---------- */
+#viewport {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#stageWrap { position: relative; width: 390px; height: 844px; flex: none; }
+#stage {
+  position: absolute; left: 0; top: 0;
+  width: 390px; height: 844px;
+  transform-origin: 0 0;
+}
+@media (min-width: 521px) {
+  body { background: var(--bg-deep); }
+  #viewport { padding: 16px 0; }
+  #stage {
+    border-radius: 40px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 30px 80px rgba(0,0,0,.5);
+  }
+}
+
+/* ---------- 배경화면 카드 (이 노드만 이미지로 저장) ---------- */
+#card {
+  position: absolute; left: 0; top: 0;
+  width: 390px; height: 844px;
+  background: var(--bg);
+  overflow: hidden;
+}
+/* 상단 28%(236.3px)·하단 8%(67.5px)는 비움 → 영수증은 238px ~ 776px 안에서만 */
+.feed {
+  position: absolute; left: 0; right: 0; top: 238px; bottom: 0;
+  overflow: hidden;
+}
+.receipt {
+  position: relative;
+  width: 312px; margin: 0 auto;
+  color: var(--ink);
+  filter: drop-shadow(0 12px 16px rgba(0,0,0,.30)) drop-shadow(0 2px 2px rgba(0,0,0,.22));
+  transform: translateY(calc(-100% - 48px));
+  visibility: hidden;
+}
+.receipt.shown { visibility: visible; }
+.paper {
+  background-color: var(--paper);
+  background-image: linear-gradient(180deg, rgba(40,30,20,.045), rgba(40,30,20,0) 22px);
+  padding: 13px 18px 9px;
+  font-size: 11px;
+  line-height: 1.45;
+  text-shadow: 0 0 .35px rgba(58,54,49,.55);
+}
+.tear { display: block; width: 312px; height: 9px; margin-top: -1px; }
+
+.shop { font-size: 17px; font-weight: 700; line-height: 1.25; text-align: center; letter-spacing: .14em; }
+/* 영수증 안의 글자 크기는 정수 px만 사용: html-to-image가 소수점 크기를 내림해서 저장 이미지와 화면이 달라짐 */
+.biz { text-align: center; font-size: 10px; color: var(--ink-soft); margin-top: 1px; }
+.rule { border: 0; border-top: 1px dashed var(--ink-line); margin: 5px 0; }
+.rule.double { border-top: 3px double rgba(58,54,49,.62); }
+.kv { display: flex; justify-content: space-between; gap: 10px; }
+.kv dt { flex: none; }
+.kv dd { text-align: right; white-space: nowrap; }
+
+.cols { display: grid; grid-template-columns: 1fr 26px 50px; align-items: center; }
+.items-head { font-size: 10px; color: var(--ink-soft); margin-bottom: 1px; }
+.items-head span:nth-child(2), .items .qt { text-align: center; }
+.items-head span:nth-child(3), .items .pr { text-align: right; }
+.items { list-style: none; }
+.items li { height: 16px; line-height: 16px; overflow: hidden; }
+.items .nm { white-space: nowrap; overflow: hidden; display: block; }
+.items li.spin .nm, .items li.spin .pr { filter: blur(.45px); opacity: .72; }
+.items li.spin .nm { animation: reel 96ms linear infinite; }
+@keyframes reel { from { transform: translateY(-38%); } to { transform: translateY(38%); } }
+
+.totals .sum { font-size: 14px; font-weight: 700; line-height: 1.5; }
+.totals .sum dd { letter-spacing: .08em; }
+
+.seal { position: relative; height: 32px; margin: 6px 0 2px; font-size: 10px; line-height: 16px; color: var(--ink-soft); }
+.seal .sign { position: absolute; right: 22px; bottom: 0; color: var(--ink); }
+.stamp {
+  --jx: 0px; --jy: 0px;
+  position: absolute;
+  width: 74px; height: 74px;
+  right: calc(-4.5px + var(--jx));
+  bottom: calc(-29px + var(--jy));
+  color: var(--red);
+  opacity: 0;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.stamp svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* 주의: SVG 내부 요소의 글꼴·색은 CSS 대신 속성으로 지정 (html-to-image가 SVG 자식의 CSS를 옮기지 않음) */
+
+.barcode { text-align: center; }
+.barcode svg { display: block; width: 214px; height: 30px; margin: 2px auto 0; }
+.barcode p { font-size: 10px; line-height: 1.3; letter-spacing: .22em; margin-top: 2px; }
+.reveal { opacity: 0; }
+
+.letter p.body {
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  margin-top: 1px;
+}
+.letter .from { text-align: right; margin-top: 3px; }
+
+.foot { text-align: center; font-size: 10px; line-height: 1.5; color: var(--ink-soft); }
+.foot p:first-child { color: var(--ink); font-weight: 700; }
+
+/* ---------- 프린터 (화면 전용, 카드 밖) ---------- */
+#printer {
+  position: absolute; left: 0; right: 0; top: 0; height: 238px;
+  z-index: 2;
+  pointer-events: none;
+}
+.machine {
+  position: absolute; left: 16px; right: 16px; top: 14px; bottom: 0;
+  padding: 15px 16px 0;
+  border-radius: 24px 24px 8px 8px;
+  background: linear-gradient(180deg, var(--metal-1) 0%, var(--metal-2) 62%, var(--metal-3) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 14px 30px rgba(0,0,0,.35);
+  pointer-events: auto;
+}
+.brand { display: flex; align-items: center; gap: 8px; height: 16px; font-size: 11px; color: #aab1bb; letter-spacing: .06em; }
+.brand .model { margin-left: auto; font-size: 9.5px; color: #6f7783; letter-spacing: .12em; }
+.led { width: 7px; height: 7px; border-radius: 50%; background: #4a5058; box-shadow: inset 0 1px 1px rgba(0,0,0,.5); flex: none; }
+.led.on { background: var(--red); box-shadow: 0 0 7px rgba(196,57,45,.75); }
+.led.blink { animation: blink .5s steps(1) infinite; }
+
+.lcd {
+  margin-top: 11px;
+  height: 62px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--lcd);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.05);
+  font-size: 13px; line-height: 20px;
+  color: var(--lcd-ink);
+  text-shadow: 0 0 6px rgba(236,230,212,.16);
+  white-space: nowrap; overflow: hidden;
+}
+.lcd > span { display: block; }
+.cursor { display: inline-block; width: 7px; height: 13px; margin-left: 4px; vertical-align: -1px; background: var(--lcd-ink); opacity: .85; animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.controls { display: flex; gap: 8px; margin-top: 13px; }
+.field {
+  flex: 1; min-width: 0; height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: #191d23;
+  font-size: 16px;
+  color: var(--lcd-ink);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.45);
+  outline: none;
+}
+.field::placeholder { color: #6c7480; }
+.field:focus { border-color: rgba(236,230,212,.35); }
+.key {
+  flex: none; height: 46px; padding: 0 16px;
+  border: 0; border-radius: 12px;
+  font-size: 14px; font-weight: 700; letter-spacing: .02em;
+  color: var(--lcd-ink);
+  background: linear-gradient(#414955, #333a44);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 2px 0 #171a1f, 0 3px 6px rgba(0,0,0,.3);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .06s, box-shadow .06s;
+}
+.key.primary {
+  color: #2a2723;
+  background: linear-gradient(#f7f2e6, #e5dece);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 0 #8f887a, 0 3px 6px rgba(0,0,0,.3);
+}
+.key:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 0 #171a1f; }
+.key:disabled { opacity: .5; cursor: default; }
+.key:focus-visible, .ov-btn:focus-visible { outline: 2px solid var(--lcd-ink); outline-offset: 2px; }
+.controls.wide .key { flex: 1; }
+
+.lip {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 30px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(#20252c, #1a1e24);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,.4);
+  text-align: center;
+  font-size: 9px; line-height: 20px; letter-spacing: .3em; color: #59616c;
+}
+.slot {
+  position: absolute; left: 50%; bottom: -3px;
+  width: 330px; height: 7px; margin-left: -165px;
+  border-radius: 4px;
+  background: #08090c;
+  box-shadow: inset 0 2px 2px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.06);
+}
+.slot-shade {
+  position: absolute; left: 50%; top: 242px;
+  width: 312px; height: 12px; margin-left: -156px;
+  background: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,0));
+  pointer-events: none;
+}
+
+/* ---------- 저장 결과 오버레이 ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: rgba(10,12,15,.94);
+  overflow-y: auto;
+}
+.overlay img {
+  display: block;
+  width: auto; height: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
+  max-height: calc(100dvh - 200px);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  -webkit-touch-callout: default;
+  -webkit-user-select: auto; user-select: auto;
+}
+.ov-hint { font-size: 15px; font-weight: 700; text-align: center; }
+.ov-sub { font-size: 12px; color: var(--muted); text-align: center; margin-top: -6px; }
+.ov-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.ov-btn {
+  height: 44px; padding: 0 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,.14); border-radius: 12px;
+  background: #262b33; color: var(--lcd-ink);
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  cursor: pointer; touch-action: manipulation;
+}
+.ov-btn.primary { background: #f4efe3; color: #2a2723; border-color: transparent; }
+
+.toast {
+  position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 60;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(20,23,28,.92);
+  border: 1px solid rgba(255,255,255,.1);
+  color: var(--lcd-ink); font-size: 13px; text-align: center;
+  transform: translateX(-50%);
+  transition: opacity .4s;
+  pointer-events: none;
+}
+.toast.hide { opacity: 0; }
+
+/* 캡처 모드: 버튼·프린터 숨기고 카드만 꽉 차게 */
+body.capture { background: var(--bg); }
+body.capture #printer { display: none; }
+body.capture #viewport { padding: 0; }
+body.capture #stage { border-radius: 0; box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor, .led.blink, .items li.spin .nm { animation: none; }
+  .key, .toast { transition: none; }
+}
+</style>
+</head>
+<body>
+<main id="viewport">
+  <div id="stageWrap">
+    <div id="stage">
+
+      <!-- ===== 배경화면 카드: 저장 이미지는 이 노드만 ===== -->
+      <div id="card">
+        <div class="feed">
+          <article class="receipt" id="receipt" aria-label="수능 대박 영수증">
+            <div class="paper" id="paper">
+              <header>
+                <h1 class="shop">수능대박상회</h1>
+                <p class="biz">사업자번호 2027-학년도-대박</p>
+              </header>
+              <hr class="rule">
+              <dl>
+                <div class="kv"><dt>고객명</dt><dd><span id="rName"></span> 님</dd></div>
+                <div class="kv"><dt>발행일시</dt><dd id="rTime"></dd></div>
+              </dl>
+              <hr class="rule">
+              <div class="cols items-head"><span>품명</span><span>수량</span><span>금액</span></div>
+              <ol class="items" id="items">
+                <li class="cols"><span class="nm"></span><span class="qt">1</span><span class="pr"></span></li>
+                <li class="cols"><span class="nm"></span><span class="qt">1</span><span class="pr"></span></li>
+                <li class="cols"><span class="nm"></span><span class="qt">1</span><span class="pr"></span></li>
+                <li class="cols"><span class="nm"></span><span class="qt">1</span><span class="pr"></span></li>
+                <li class="cols"><span class="nm"></span><span class="qt">1</span><span class="pr"></span></li>
+              </ol>
+              <hr class="rule double">
+              <dl class="totals">
+                <div class="kv sum"><dt>합계</dt><dd>대박</dd></div>
+                <div class="kv"><dt>결제수단</dt><dd>3년간의 노력(일시불)</dd></div>
+                <div class="kv"><dt>할인</dt><dd>긴장 -100%</dd></div>
+              </dl>
+              <div class="seal">
+                <p>위 금액을 정히 영수함.</p>
+                <p class="sign">(인)</p>
+                <div class="stamp" id="stamp" aria-hidden="true">
+                  <svg viewBox="0 0 100 100">
+                    <defs>
+                      <path id="arcTop" d="M 13 50 A 37 37 0 0 1 87 50"/>
+                      <path id="arcBot" d="M 7 50 A 43 43 0 0 0 93 50"/>
+                      <linearGradient id="inkFade" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#fff"/>
+                        <stop offset="1" stop-color="#c4c4c4"/>
+                      </linearGradient>
+                      <mask id="inkMask" maskUnits="userSpaceOnUse" x="-5" y="-5" width="110" height="110">
+                        <rect x="-5" y="-5" width="110" height="110" fill="url(#inkFade)"/>
+                        <g id="stampVoids" fill="#000"></g>
+                      </mask>
+                    </defs>
+                    <g mask="url(#inkMask)">
+                      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3.6"/>
+                      <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                      <circle cx="10" cy="50" r="1.6" fill="currentColor"/>
+                      <circle cx="90" cy="50" r="1.6" fill="currentColor"/>
+                      <text fill="currentColor" font-family="'Nanum Gothic Coding', monospace" font-weight="700" font-size="8" letter-spacing="1.2"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">수능대박상회</textPath></text>
+                      <text fill="currentColor" font-family="'Nanum Gothic Coding', monospace" font-weight="700" font-size="8" letter-spacing="1.2"><textPath href="#arcBot" startOffset="50%" text-anchor="middle" id="stampDate"></textPath></text>
+                      <text id="stampText" x="50" y="59.5" text-anchor="middle" fill="currentColor" font-family="'Noto Serif KR', 'Nanum Myeongjo', serif" font-weight="900" font-size="27">合格</text>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <hr class="rule">
+              <div class="barcode reveal" id="barcodeBox">
+                <svg id="barcode" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true"></svg>
+                <p id="barNum"></p>
+              </div>
+              <hr class="rule">
+              <div class="letter reveal" id="letterBox">
+                <p class="body" id="letter"></p>
+                <p class="from">from. <span id="from"></span></p>
+              </div>
+              <hr class="rule">
+              <footer class="foot">
+                <p>교환·환불 불가. 대박만 가능.</p>
+                <p>유효기간: <span id="validDate"></span> 단 하루</p>
+              </footer>
+            </div>
+            <svg class="tear" viewBox="0 0 312 9" preserveAspectRatio="none" aria-hidden="true"><path id="tearPath" fill="#f4efe3"/></svg>
+          </article>
+        </div>
+      </div>
+
+      <!-- ===== 프린터: 화면 전용 (저장 이미지에 안 찍힘) ===== -->
+      <section id="printer" aria-label="영수증 발급기">
+        <div class="machine">
+          <div class="brand"><span class="led" id="led"></span><span>수능대박상회 · 영수증 발급기</span><span class="model">NO.1119</span></div>
+          <div class="lcd" role="status" aria-live="polite"><span id="lcd1"></span><span><span id="lcd2"></span><span class="cursor" aria-hidden="true"></span></span></div>
+
+          <form class="controls" id="ctrlIdle" autocomplete="off">
+            <input class="field" id="nameInput" type="text" maxlength="12" placeholder="받는 분 이름" aria-label="받는 분 이름" enterkeyhint="go" spellcheck="false">
+            <button class="key primary" id="btnDraw" type="submit">행운 뽑기</button>
+          </form>
+          <div class="controls wide" id="ctrlDone" hidden>
+            <button class="key" id="btnAgain" type="button">한 장 더 뽑기</button>
+            <button class="key primary" id="btnSave" type="button">배경화면으로 저장</button>
+          </div>
+
+          <div class="lip" aria-hidden="true">영수증 나오는 곳<span class="slot"></span></div>
+        </div>
+        <div class="slot-shade" aria-hidden="true"></div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="배경화면 이미지" hidden>
+  <img id="ovImg" alt="수능 대박 영수증 배경화면 이미지">
+  <p class="ov-hint">이미지를 길게 눌러서 사진에 저장하세요</p>
+  <p class="ov-sub" id="ovSub">PC에서는 이미지 우클릭 → 이미지를 다른 이름으로 저장</p>
+  <div class="ov-btns">
+    <button class="ov-btn primary" id="btnShare" type="button" hidden>공유/저장</button>
+    <a class="ov-btn" id="btnDownload" download="suneung-receipt.png" hidden>PNG 내려받기</a>
+    <button class="ov-btn" id="btnClose" type="button">닫기</button>
+  </div>
+</div>
+<div class="toast hide" id="toast" role="status" aria-live="polite"></div>
+
+<noscript><p style="padding:24px;text-align:center">자바스크립트를 켜야 영수증이 발급됩니다.</p></noscript>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- 문구 풀: 40개, 한 번에 중복 없이 5개 ---------- */
+const POOL = [
+  '찍신 강림 확률 99%',
+  '봤던 문제만 출제됨',
+  '부분 점수 풀배점',
+  'OMR 밀려쓰기 원천 차단',
+  '영어 듣기 음질 4K',
+  '국어 지문이 아는 얘기',
+  '시계 안 봐도 시간 남음',
+  '옆자리 다리 떨기 면제',
+  '점심 도시락 소화 완벽',
+  '처음 고른 답이 정답',
+  '휴지 효과로 술술 풀림',
+  '찍은 문제 모두 정답',
+  '거울 효과, 시험 잘 봄',
+  '시험시간 두 배 이벤트',
+  '엿 효과로 답에 착 붙음',
+  '컴싸 필압 최적화',
+  '수정테이프 쓸 일 없음',
+  '샤프심 무한 리필',
+  '지우개 가루 자동 정리',
+  '시험장 온도 딱 좋음',
+  '화장실 대기 0명',
+  '쉬는 시간 체감 2배',
+  '감독관 발소리 무음',
+  '마킹 한 번에 깔끔',
+  '연필 굴리기 적중',
+  '검토 시간 넉넉',
+  '영단어 전부 아는 얼굴',
+  '계산이 딱딱 맞음',
+  '그래프가 한눈에 읽힘',
+  '머리 회전 터보 모드',
+  '공부한 거 전부 기억남',
+  '컨디션 풀충전 상태',
+  '긴장 대신 집중 2배',
+  '손난로 온기 지속',
+  '킬러 문항도 순한 맛',
+  '헷갈릴 땐 감이 정답',
+  '실력 120% 발휘 쿠폰',
+  '행운 포인트 2배 적립',
+  '멘탈 방탄 코팅 완료',
+  '마지막 교시까지 체력',
+];
+const PRICES = ['₩0', '₩0', '₩0', '₩0', '서비스', '무료'];
+const STAMPS = ['合格', '合格', '大吉', '大박'];
+const STAMP_CHARS = '合格大吉박';
+
+const CARD_W = 390, CARD_H = 844;
+const SAFE_TOP = 238;                  // 844 × 28% = 236.3 → 여유 2px
+const SAFE_BOTTOM = 776;               // 844 × 92% = 776.5
+const MAX_RECEIPT_H = SAFE_BOTTOM - SAFE_TOP;
+const MAX_NAME = 12;
+const BG = '#1e232b';
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const $ = (id) => document.getElementById(id);
+const els = {
+  stage: $('stage'), wrap: $('stageWrap'), card: $('card'),
+  receipt: $('receipt'), paper: $('paper'),
+  rName: $('rName'), rTime: $('rTime'),
+  rows: Array.from(document.querySelectorAll('#items li')).map((li) => ({
+    li, nm: li.querySelector('.nm'), pr: li.querySelector('.pr'),
+  })),
+  stamp: $('stamp'), stampText: $('stampText'), stampDate: $('stampDate'), stampVoids: $('stampVoids'),
+  barcode: $('barcode'), barNum: $('barNum'),
+  letter: $('letter'), from: $('from'), validDate: $('validDate'),
+  reveals: [$('barcodeBox'), $('letterBox')],
+  tearPath: $('tearPath'),
+  led: $('led'), lcd1: $('lcd1'), lcd2: $('lcd2'),
+  ctrlIdle: $('ctrlIdle'), ctrlDone: $('ctrlDone'),
+  nameInput: $('nameInput'), btnDraw: $('btnDraw'), btnAgain: $('btnAgain'), btnSave: $('btnSave'),
+  overlay: $('overlay'), ovImg: $('ovImg'), ovSub: $('ovSub'),
+  btnShare: $('btnShare'), btnDownload: $('btnDownload'), btnClose: $('btnClose'),
+  toast: $('toast'),
+};
+
+const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = () => reduceMQ.matches;
+
+const state = {
+  name: '', fromParam: false,
+  items: [], stampRot: -10,
+  phase: 'idle', busy: false, printed: false,
+  file: null,
+};
+
+/* ---------- 유틸 ---------- */
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const pad2 = (n) => String(n).padStart(2, '0');
+const withTimeout = (p, ms) => Promise.race([
+  p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ' + ms + 'ms')), ms)),
+]);
+
+function cleanText(raw, max) {
+  const s = String(raw == null ? '' : raw)
+    .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202E\u2066-\u2069\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return Array.from(s).slice(0, max).join('');
+}
+const cleanName = (raw) => cleanText(raw, MAX_NAME);
+
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (const ch of str) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h >>> 0;
+}
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* 애니메이션이 끝나면 마지막 상태를 인라인 스타일로 고정 (저장 이미지에도 그대로 찍히게) */
+function animateTo(el, keyframes, opts, finalStyle) {
+  return new Promise((resolve) => {
+    const done = () => { if (finalStyle) Object.assign(el.style, finalStyle); resolve(); };
+    if (typeof el.animate !== 'function') { done(); return; }
+    const anim = el.animate(keyframes, Object.assign({ fill: 'forwards' }, opts));
+    anim.onfinish = () => { if (finalStyle) Object.assign(el.style, finalStyle); anim.cancel(); resolve(); };
+    anim.oncancel = () => resolve();
+  });
+}
+
+/* ---------- 영수증 내용 ---------- */
+function pickItems(prev) {
+  const prevTexts = new Set((prev || []).map((it) => it.text));
+  let candidates = POOL.filter((t) => !prevTexts.has(t));
+  if (candidates.length < 5) candidates = POOL.slice();
+  return shuffle(candidates).slice(0, 5).map((text) => ({ text, price: pick(PRICES) }));
+}
+
+function setItems(items) {
+  els.rows.forEach((r, i) => {
+    r.li.classList.remove('spin');
+    r.nm.textContent = items[i].text;
+    r.pr.textContent = items[i].price;
+  });
+}
+
+function setTime() {
+  const d = new Date();
+  els.rTime.textContent =
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
+    `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
+function examDigits() {
+  const digits = String(CONFIG.examDate || '').replace(/\D/g, '');
+  return digits.length === 8 ? digits : '20261119';
+}
+
+function renderBarcode(name) {
+  const h = fnv1a(name);
+  const rnd = mulberry32(h);
+  const bars = [];
+  let x = 0;
+  const bar = (w) => { bars.push([x, w]); x += w; };
+  const gap = (w) => { x += w; };
+  bar(2); gap(1); bar(1); gap(1);                // 시작 가드
+  while (x < 104) {
+    bar(1 + Math.floor(rnd() * 3) + (rnd() < 0.1 ? 1 : 0));
+    gap(1 + Math.floor(rnd() * 2.4));
+  }
+  gap(1); bar(1); gap(1); bar(2);                // 끝 가드
+  const svg = els.barcode;
+  svg.setAttribute('viewBox', `0 0 ${x} 40`);
+  svg.replaceChildren();
+  for (const [bx, bw] of bars) {
+    const r = document.createElementNS(SVG_NS, 'rect');
+    r.setAttribute('x', bx); r.setAttribute('y', 0);
+    r.setAttribute('width', bw); r.setAttribute('height', 40);
+    r.setAttribute('fill', 'currentColor');
+    svg.appendChild(r);
+  }
+  els.barNum.textContent = `${examDigits()}-${String(h % 10000).padStart(4, '0')}`;
+}
+
+function renderName() {
+  els.rName.textContent = state.name;
+  renderBarcode(state.name);
+}
+
+function buildTear() {
+  const rnd = mulberry32(1119);
+  const W = 312;
+  let d = `M0 0 H${W} V1.5`;
+  let x = W, deep = true;
+  while (x > 0) {
+    x = Math.max(0, x - (3 + rnd() * 1.6));
+    const y = deep ? 6 + rnd() * 2.6 : 0.8 + rnd() * 1.6;
+    d += ` L${x.toFixed(2)} ${y.toFixed(2)}`;
+    deep = !deep;
+  }
+  d += ' L0 0 Z';
+  els.tearPath.setAttribute('d', d);
+}
+
+function applyNoise() {
+  try {
+    const size = 96;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const dark = Math.random() < 0.5;
+      const v = dark ? 70 : 255;
+      img.data[i] = v; img.data[i + 1] = v - (dark ? 6 : 0); img.data[i + 2] = v - (dark ? 14 : 4);
+      img.data[i + 3] = Math.floor(Math.random() * (dark ? 13 : 18));
+    }
+    ctx.putImageData(img, 0, 0);
+    els.paper.style.backgroundImage =
+      `linear-gradient(180deg, rgba(40,30,20,.045), rgba(40,30,20,0) 22px), url(${c.toDataURL('image/png')})`;
+  } catch (e) { /* 노이즈 없이도 동작 */ }
+}
+
+/* 도장: 글자·기울기·잉크 빠짐을 매번 새로 */
+function prepareStamp() {
+  els.stampText.textContent = pick(STAMPS);
+  const sign = Math.random() < 0.8 ? -1 : 1;
+  state.stampRot = sign * (6 + Math.random() * 9);
+  els.stamp.style.setProperty('--jx', `${(Math.random() * 6 - 3).toFixed(1)}px`);
+  els.stamp.style.setProperty('--jy', `${(Math.random() * 4 - 2).toFixed(1)}px`);
+
+  const rnd = mulberry32((Math.random() * 1e9) >>> 0);
+  const g = els.stampVoids;
+  g.replaceChildren();
+  for (let i = 0; i < 56; i++) {
+    const a = rnd() * Math.PI * 2;
+    const r = Math.sqrt(rnd()) * 48;
+    const c = document.createElementNS(SVG_NS, 'ellipse');
+    c.setAttribute('cx', (50 + Math.cos(a) * r).toFixed(2));
+    c.setAttribute('cy', (50 + Math.sin(a) * r).toFixed(2));
+    const s = 0.25 + rnd() * 1.25;
+    c.setAttribute('rx', s.toFixed(2));
+    c.setAttribute('ry', (s * (0.5 + rnd() * 0.6)).toFixed(2));
+    c.setAttribute('fill-opacity', (0.45 + rnd() * 0.55).toFixed(2));
+    g.appendChild(c);
+  }
+  // 바깥 테두리 쪽 잉크가 덜 묻은 자리 몇 군데
+  for (let i = 0; i < 3; i++) {
+    const a = rnd() * Math.PI * 2;
+    const c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('cx', (50 + Math.cos(a) * 46.5).toFixed(2));
+    c.setAttribute('cy', (50 + Math.sin(a) * 46.5).toFixed(2));
+    c.setAttribute('r', (1.4 + rnd() * 1.8).toFixed(2));
+    c.setAttribute('fill-opacity', (0.35 + rnd() * 0.35).toFixed(2));
+    g.appendChild(c);
+  }
+  els.stamp.style.opacity = '0';
+  els.stamp.style.transform = `rotate(${state.stampRot.toFixed(2)}deg)`;
+}
+
+function showStampNow() {
+  els.stamp.style.opacity = '1';
+  els.stamp.style.transform = `rotate(${state.stampRot.toFixed(2)}deg)`;
+}
+
+/* 편지가 길면 글자 크기를 줄여서 영수증이 하단 8% 위에서 끝나게.
+   1px 단위(정수)로만 줄임: 소수점 크기는 저장 이미지에서 내림 처리돼 화면과 달라짐 */
+function fit() {
+  const L = els.letter;
+  L.style.maxHeight = '';
+  L.style.overflow = '';
+  for (let size = 12; size >= 8; size--) {
+    L.style.fontSize = size + 'px';
+    if (els.receipt.offsetHeight <= MAX_RECEIPT_H) break;
+  }
+  const over = els.receipt.offsetHeight - MAX_RECEIPT_H;
+  if (over > 0) {
+    L.style.maxHeight = Math.max(0, L.offsetHeight - over) + 'px';
+    L.style.overflow = 'hidden';
+  }
+}
+
+/* ---------- 화면 맞춤 (카드는 390×844 그대로, 바깥만 축소) ---------- */
+let lastW = 0;
+function layout(force) {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const typing = document.activeElement === els.nameInput;
+  if (!force && typing && vw === lastW) return;      // 키보드가 올라올 때 출렁이지 않게
+  lastW = vw;
+  const capture = document.body.classList.contains('capture');
+  const gutter = (!capture && vw > 520) ? 32 : 0;
+  let s = Math.min((vw - gutter) / CARD_W, (vh - gutter) / CARD_H);
+  if (capture) s = Math.max(s, 0.1);
+  else s = Math.max(Math.min(s, 1), Math.min(0.62, vw / CARD_W));
+  els.stage.style.transform = `scale(${s})`;
+  els.wrap.style.width = `${CARD_W * s}px`;
+  els.wrap.style.height = `${CARD_H * s}px`;
+}
+
+/* ---------- 프린터 상태 ---------- */
+function lcd(a, b) { els.lcd1.textContent = a; els.lcd2.textContent = b; }
+
+function previewName() {
+  return state.fromParam ? state.name
+    : (cleanName(els.nameInput.value) || cleanName(CONFIG.defaultName) || '수험생');
+}
+
+function setPhase(p) {
+  state.phase = p;
+  const working = p === 'printing' || p === 'reprint' || p === 'saving';
+  els.led.className = 'led' + (working ? ' on blink' : (p === 'done' ? ' on' : ''));
+
+  if (p === 'idle') lcd(`${previewName()} 님 앞으로`, '영수증 1장이 대기 중입니다');
+  else if (p === 'printing') lcd('영수증 출력 중', '용지를 당기지 마세요');
+  else if (p === 'reprint') lcd('품목 다시 뽑는 중', '대박은 그대로 유지됩니다');
+  else if (p === 'saving') lcd('배경화면 만드는 중', '잠시만 기다려 주세요');
+  else if (p === 'done') lcd(`${state.name} 님, 발급 완료`, '교환·환불은 불가합니다');
+
+  const showIdle = !state.printed;
+  els.ctrlIdle.hidden = !showIdle;
+  els.ctrlDone.hidden = showIdle;
+  els.btnDraw.disabled = working;
+  els.nameInput.disabled = working;
+  els.btnDraw.textContent = p === 'printing' ? '출력 중…' : '행운 뽑기';
+  els.btnAgain.disabled = working;
+  els.btnSave.disabled = working;
+  els.btnAgain.textContent = p === 'reprint' ? '뽑는 중…' : '한 장 더 뽑기';
+  els.btnSave.textContent = p === 'saving' ? '만드는 중…' : '배경화면으로 저장';
+}
+
+/* ---------- 슬롯머신 ---------- */
+function spinRows(items, stops) {
+  return new Promise((resolve) => {
+    const rows = els.rows;
+    const stopped = rows.map(() => false);
+    let t0 = null, lastSwap = 0;
+    rows.forEach((r) => r.li.classList.add('spin'));
+    const tick = (now) => {
+      if (t0 === null) t0 = now;
+      const t = now - t0;
+      const swap = now - lastSwap >= 55;
+      if (swap) lastSwap = now;
+      rows.forEach((r, i) => {
+        if (stopped[i]) return;
+        if (t >= stops[i]) {
+          stopped[i] = true;
+          r.li.classList.remove('spin');
+          r.nm.textContent = items[i].text;
+          r.pr.textContent = items[i].price;
+          if (typeof r.li.animate === 'function') {
+            r.li.animate(
+              [{ transform: 'translateY(-5px)' }, { transform: 'translateY(1px)', offset: 0.65 }, { transform: 'translateY(0)' }],
+              { duration: 190, easing: 'ease-out' }
+            );
+          }
+          return;
+        }
+        if (swap) { r.nm.textContent = pick(POOL); r.pr.textContent = pick(PRICES); }
+      });
+      if (stopped.every(Boolean)) resolve();
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+/* ---------- 도장 쾅 ---------- */
+function stampIt() {
+  const rot = `rotate(${state.stampRot.toFixed(2)}deg)`;
+  setTimeout(() => {
+    try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* 미지원 기기 */ }
+    if (typeof els.receipt.animate === 'function') {
+      els.receipt.animate(
+        [{ transform: 'translateY(0)' }, { transform: 'translateY(1.5px)' }, { transform: 'translateY(0)' }],
+        { duration: 140, easing: 'ease-out' }
+      );
+    }
+  }, 165);
+  return animateTo(els.stamp, [
+    { opacity: 0, transform: `${rot} scale(1.9)`, easing: 'cubic-bezier(.55,0,1,.45)' },
+    { opacity: 1, transform: `${rot} scale(.93)`, offset: 0.72, easing: 'cubic-bezier(0,.55,.45,1)' },
+    { opacity: 1, transform: `${rot} scale(1)` },
+  ], { duration: 230 }, { opacity: '1', transform: rot });
+}
+
+function hideReveals() { els.reveals.forEach((el) => { el.style.opacity = '0'; el.style.transform = ''; }); }
+function showRevealsNow() { els.reveals.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; }); }
+function revealAll() {
+  return Promise.all(els.reveals.map((el, i) => sleep(i * 140).then(() => animateTo(el, [
+    { opacity: 0, transform: 'translateY(4px)' },
+    { opacity: 1, transform: 'translateY(0)' },
+  ], { duration: 380, easing: 'ease-out' }, { opacity: '1', transform: 'none' }))));
+}
+
+/* ---------- 흐름 ---------- */
+async function draw() {
+  if (state.busy || state.printed) return;
+  state.busy = true;
+  state.name = previewName();
+  els.nameInput.blur();
+
+  renderName();
+  setTime();
+  state.items = pickItems(state.items);
+  prepareStamp();
+  hideReveals();
+  setItems(state.items);
+  fit();
+  setPhase('printing');
+
+  const R = els.receipt;
+  R.classList.add('shown');
+
+  if (reduced()) {
+    R.style.transform = 'none';
+    showStampNow();
+    showRevealsNow();
+  } else {
+    const T0 = performance.now();
+    const at = (ms) => sleep(Math.max(0, T0 + ms - performance.now()));
+    animateTo(R, [
+      { transform: 'translateY(calc(-100% - 12px))' },
+      { transform: 'translateY(0)' },
+    ], { duration: 1750, easing: 'cubic-bezier(.12,.5,.3,1)' }, { transform: 'none' });
+    await spinRows(state.items, [1050, 1300, 1550, 1800, 2050]);
+    await at(2280);
+    await stampIt();
+    await at(2620);
+    await revealAll();
+  }
+
+  state.printed = true;
+  state.busy = false;
+  setPhase('done');
+  els.btnSave.focus({ preventScroll: true });
+}
+
+async function redraw() {
+  if (state.busy || !state.printed) return;
+  state.busy = true;
+  setPhase('reprint');
+  setTime();
+  state.items = pickItems(state.items);
+
+  if (reduced()) {
+    prepareStamp();
+    setItems(state.items);
+    showStampNow();
+  } else {
+    await animateTo(els.stamp, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in' }, { opacity: '0' });
+    prepareStamp();
+    await spinRows(state.items, [450, 630, 810, 990, 1170]);
+    await sleep(160);
+    await stampIt();
+  }
+
+  state.busy = false;
+  setPhase('done');
+}
+
+/* ---------- 배경화면 저장 ---------- */
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = () => reject(fr.error);
+    fr.readAsDataURL(blob);
+  });
+}
+
+/* 카드에 실제로 찍힌 글자만 담은 폰트 서브셋을 받아 data URI로 임베드.
+   (한글 웹폰트 조각 100여 개를 통째로 넣으면 모바일에서 느리고 자주 실패함) */
+async function buildFontCSS() {
+  const chars = new Set(Array.from(els.card.textContent.replace(/\s+/g, '')));
+  '0123456789-.:·()%₩ '.split('').forEach((c) => chars.add(c));
+  const text = Array.from(chars).join('');
+  const sheets = [
+    'https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&text=' + encodeURIComponent(text),
+    'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&text=' + encodeURIComponent(STAMP_CHARS),
+  ];
+  let out = '';
+  for (const href of sheets) {
+    const res = await fetch(href, { mode: 'cors' });
+    if (!res.ok) throw new Error('font css ' + res.status);
+    let css = await res.text();
+    const urls = Array.from(new Set(Array.from(css.matchAll(/url\((['"]?)(https:[^'")]+)\1\)/g), (m) => m[2])));
+    if (!urls.length) throw new Error('font css has no url');
+    for (const u of urls) {
+      const fr = await fetch(u, { mode: 'cors' });
+      if (!fr.ok) throw new Error('font file ' + fr.status);
+      const dataUrl = await blobToDataURL(await fr.blob());
+      css = css.split(u).join(dataUrl);
+    }
+    out += css + '\n';
+  }
+  return out;
+}
+
+function checkImage(url, w, h) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img.naturalWidth === w && img.naturalHeight === h);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+async function renderPNG() {
+  if (!window.htmlToImage || typeof window.htmlToImage.toPng !== 'function') {
+    throw new Error('html-to-image not loaded');
+  }
+  await document.fonts.ready;
+  let fontCSS = null;
+  try { fontCSS = await withTimeout(buildFontCSS(), 10000); }
+  catch (e) { console.warn('[save] 폰트 서브셋 실패, 기본 임베드로 진행:', e && e.message); }
+
+  const base = {
+    width: CARD_W, height: CARD_H,
+    backgroundColor: BG,
+    style: { position: 'relative', left: '0', top: '0', margin: '0', transform: 'none' },
+  };
+  if (fontCSS) base.fontEmbedCSS = fontCSS;
+  // iOS Safari는 첫 렌더에서 폰트·이미지가 빠지는 경우가 있어 저해상도로 한 번 예열
+  await withTimeout(window.htmlToImage.toPng(els.card, Object.assign({}, base, { pixelRatio: 1 })), 20000);
+  const url = await withTimeout(window.htmlToImage.toPng(els.card, Object.assign({}, base, { pixelRatio: 3 })), 30000);
+  if (!(await checkImage(url, CARD_W * 3, CARD_H * 3))) throw new Error('image size mismatch');
+  return url;
+}
+
+async function save() {
+  if (state.busy || !state.printed) return;
+  state.busy = true;
+  setPhase('saving');
+  let url = null;
+  try { url = await renderPNG(); }
+  catch (e) { console.warn('[save] 이미지 생성 실패 → 캡처 모드:', e && e.message); }
+  state.busy = false;
+  setPhase('done');
+  if (url) await openOverlay(url);
+  else enterCapture();
+}
+
+async function openOverlay(url) {
+  els.ovImg.src = url;
+  state.file = null;
+  els.btnShare.hidden = true;
+  const finePointer = window.matchMedia('(pointer: fine)').matches;
+  els.btnDownload.hidden = !finePointer;
+  els.btnDownload.href = url;
+  els.ovSub.hidden = !finePointer;
+  els.overlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+  els.btnClose.focus({ preventScroll: true });
+  try {
+    const blob = await (await fetch(url)).blob();
+    const file = new File([blob], 'suneung-receipt.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      state.file = file;
+      els.btnShare.hidden = false;
+    }
+  } catch (e) { /* 공유 미지원: 길게 눌러 저장 안내만 */ }
+}
+
+function closeOverlay() {
+  els.overlay.hidden = true;
+  els.ovImg.removeAttribute('src');
+  document.body.style.overflow = '';
+  els.btnSave.focus({ preventScroll: true });
+}
+
+async function share() {
+  if (!state.file) return;
+  try { await navigator.share({ files: [state.file], title: '수능 대박 영수증' }); }
+  catch (e) { if (e && e.name !== 'AbortError') toast('공유가 안 되면 이미지를 길게 눌러 저장하세요'); }
+}
+
+let toastTimer = 0;
+function toast(msg, ms) {
+  els.toast.textContent = msg;
+  els.toast.classList.remove('hide');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => els.toast.classList.add('hide'), ms || 2400);
+}
+
+function enterCapture() {
+  document.body.classList.add('capture');
+  layout(true);
+  toast('이 화면을 캡처해서 배경화면으로 쓰세요 · 화면을 누르면 돌아갑니다', 2600);
+  setTimeout(() => {
+    document.addEventListener('click', exitCapture, { once: true });
+  }, 400);
+}
+function exitCapture() {
+  if (!document.body.classList.contains('capture')) return;
+  document.body.classList.remove('capture');
+  els.toast.classList.add('hide');
+  layout(true);
+}
+
+/* ---------- 시작 ---------- */
+function init() {
+  const param = cleanName(new URLSearchParams(window.location.search).get('to'));
+  state.fromParam = !!param;
+  state.name = param || cleanName(CONFIG.defaultName) || '수험생';
+  if (state.fromParam) {
+    els.nameInput.hidden = true;
+    els.ctrlIdle.classList.add('wide');
+  }
+
+  els.from.textContent = cleanText(CONFIG.from, 20);
+  els.letter.textContent = String(CONFIG.letter == null ? '' : CONFIG.letter).trim();
+  els.validDate.textContent = CONFIG.examDate;
+  els.stampDate.textContent = CONFIG.examDate;
+
+  buildTear();
+  applyNoise();
+  renderName();
+  setTime();
+  state.items = pickItems([]);
+  setItems(state.items);
+  prepareStamp();
+
+  setPhase('idle');
+  layout(true);
+  fit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+
+  els.nameInput.addEventListener('input', () => { if (state.phase === 'idle') setPhase('idle'); });
+  els.ctrlIdle.addEventListener('submit', (e) => { e.preventDefault(); draw(); });
+  els.btnAgain.addEventListener('click', redraw);
+  els.btnSave.addEventListener('click', save);
+  els.btnShare.addEventListener('click', share);
+  els.btnClose.addEventListener('click', closeOverlay);
+  els.overlay.addEventListener('click', (e) => { if (e.target === els.overlay) closeOverlay(); });
+  els.nameInput.addEventListener('blur', () => setTimeout(() => layout(true), 250));
+  window.addEventListener('resize', () => layout(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!els.overlay.hidden) closeOverlay();
+    else exitCapture();
+  });
+}
+
+init();
+})();
+</script>
+</body>
+</html>
